@@ -1,0 +1,255 @@
+<!doctype html>
+<!-- Vị trí file: wp-content/gb-tools/seo-tools/cong-cu-tao-slug.html -->
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Công cụ tạo Slug URL chuẩn SEO online - Slug Generator</title>
+<meta name="description" content="Chuyển đổi tiêu đề và văn bản tiếng Việt có dấu thành đường dẫn URL slug an toàn, thân thiện SEO ngay trên trình duyệt.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.1.11"></script>
+<style type="text/tailwindcss">
+  @theme {
+    --font-sans: Roboto, ui-sans-serif, system-ui, sans-serif;
+    --color-primary: #fdca1e; --color-primary-hover: #e8b008; --color-primary-soft: #fffbeb;
+    --color-primary-ink: #9c6406; --color-ink: #0f172a; --color-neutral: #e2e8f0;
+  }
+</style>
+</head>
+<body class="bg-white font-sans text-ink antialiased">
+<main class="mx-auto max-w-5xl p-4 sm:p-6 space-y-6">
+  
+  <div class="bg-white border border-neutral rounded-2xl shadow-xs overflow-hidden">
+    
+    <!-- Hàng điều khiển 1: Tiêu đề, Dấu phân cách, Trường hợp, Tối đa, Từ dừng, Mỗi dòng & Trạng thái -->
+    <div class="p-4 sm:px-6 border-b border-neutral flex flex-wrap items-center justify-between gap-3 bg-slate-50/50">
+      <div class="flex flex-wrap items-center gap-3">
+        <span class="font-bold text-sm text-ink">Trình tạo Slug</span>
+        
+        <!-- Select Dấu phân cách -->
+        <div class="flex items-center gap-2">
+          <label for="separatorSelect" class="text-xs font-semibold text-slate-500">Dấu phân cách</label>
+          <select id="separatorSelect" onchange="autoGenerateIfReady()" class="rounded-xl border border-neutral bg-white px-3 py-2 text-xs font-bold text-ink outline-none focus:border-primary cursor-pointer">
+            <option value="-">Dấu gạch ngang (-)</option>
+            <option value="_">Dấu gạch dưới (_)</option>
+          </select>
+        </div>
+
+        <!-- Select Trường hợp -->
+        <div class="flex items-center gap-2">
+          <label for="caseSelect" class="text-xs font-semibold text-slate-500">Trường hợp</label>
+          <select id="caseSelect" onchange="autoGenerateIfReady()" class="rounded-xl border border-neutral bg-white px-3 py-2 text-xs font-bold text-ink outline-none focus:border-primary cursor-pointer">
+            <option value="lower">chữ thường</option>
+            <option value="preserve">Bảo tồn</option>
+          </select>
+        </div>
+
+        <!-- Input Tối đa ký tự -->
+        <div class="flex items-center gap-2">
+          <label for="maxLengthInput" class="text-xs font-semibold text-slate-500">Tối đa</label>
+          <input type="number" id="maxLengthInput" value="0" min="0" max="500" oninput="autoGenerateIfReady()" class="w-16 rounded-xl border border-neutral bg-white px-2.5 py-2 text-xs font-mono font-bold text-ink outline-none focus:border-primary">
+        </div>
+
+        <!-- Checkbox Từ dừng -->
+        <label class="flex items-center gap-2 rounded-xl border border-neutral bg-white px-3 py-2 text-xs font-bold text-ink cursor-pointer hover:border-primary select-none">
+          <input type="checkbox" id="chkStopWords" onchange="autoGenerateIfReady()" class="w-3.5 h-3.5 rounded accent-amber-500 cursor-pointer">
+          <span>Từ dừng</span>
+        </label>
+
+        <!-- Checkbox Mỗi dòng -->
+        <label class="flex items-center gap-2 rounded-xl border border-neutral bg-white px-3 py-2 text-xs font-bold text-ink cursor-pointer hover:border-primary select-none">
+          <input type="checkbox" id="chkPerLine" onchange="autoGenerateIfReady()" class="w-3.5 h-3.5 rounded accent-amber-500 cursor-pointer">
+          <span>Mỗi dòng</span>
+        </label>
+      </div>
+
+      <!-- Badge trạng thái -->
+      <span id="statusBadge" class="px-3 py-1 rounded-lg border border-neutral bg-white text-[11px] font-bold text-slate-500">
+        Đang chờ
+      </span>
+    </div>
+
+    <!-- Hàng điều khiển 2: Các nút thao tác -->
+    <div class="p-4 sm:px-6 border-b border-neutral flex flex-wrap items-center gap-2.5 bg-white">
+      <button type="button" onclick="generateSlugs()" class="min-h-9 rounded-xl bg-primary px-5 font-bold text-xs text-ink hover:bg-primary-hover shadow-xs cursor-pointer transition-colors">
+        Tạo
+      </button>
+
+      <button type="button" onclick="copySlugOutput()" class="min-h-9 rounded-xl border border-neutral bg-white px-4 font-semibold text-xs text-ink hover:border-primary cursor-pointer transition-colors">
+        Sao chép slug
+      </button>
+
+      <button type="button" onclick="clearAll()" class="min-h-9 rounded-xl border border-neutral bg-white px-4 font-semibold text-xs text-slate-600 hover:border-primary hover:text-ink cursor-pointer transition-colors">
+        Xóa
+      </button>
+    </div>
+
+    <!-- Khu vực làm việc 2 cột song song (Đầu vào & Slug) -->
+    <div class="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-neutral">
+      
+      <!-- Cột trái: Đầu vào -->
+      <div class="flex flex-col">
+        <div class="px-5 py-3 border-b border-neutral bg-slate-50/40 flex items-center justify-between">
+          <span class="font-bold text-xs text-ink">Đầu vào</span>
+          <span id="inputCharCount" class="text-xs font-mono text-slate-400">0 ký tự</span>
+        </div>
+        <textarea id="inputArea" rows="13" oninput="updateCharCount()" placeholder="Nhập tiêu đề hoặc cụm từ để chuyển thành đường dẫn URL" class="w-full flex-1 p-5 text-xs font-mono text-ink outline-none bg-white resize-y leading-relaxed"></textarea>
+      </div>
+
+      <!-- Cột phải: Đầu ra Slug -->
+      <div class="flex flex-col bg-slate-50/20">
+        <div class="px-5 py-3 border-b border-neutral bg-slate-50/40 flex items-center justify-between">
+          <span class="font-bold text-xs text-primary-ink">Slug</span>
+          <span id="outputStatus" class="text-xs font-mono text-slate-400">Đã xóa</span>
+        </div>
+        <textarea id="outputArea" rows="13" readonly placeholder="Đường dẫn URL slug sạch sẽ hiển thị tại đây..." class="w-full flex-1 p-5 text-xs font-mono text-ink outline-none bg-transparent resize-y leading-relaxed"></textarea>
+      </div>
+
+    </div>
+
+  </div>
+
+</main>
+
+<script>
+  // Danh sách từ dừng (Stop words) tiếng Việt & tiếng Anh phổ biến
+  const STOP_WORDS = new Set([
+    'và', 'hoặc', 'là', 'của', 'những', 'các', 'cho', 'với', 'trong', 'trên', 'dưới', 'tại', 'từ', 'đến', 'để', 'một', 'như', 'thì', 'mà', 'bị', 'được', 'này', 'đó', 'kia',
+    'a', 'an', 'the', 'and', 'or', 'but', 'if', 'then', 'else', 'when', 'at', 'by', 'for', 'with', 'about', 'against', 'between', 'into', 'through', 'during', 'before', 'after', 'to', 'from', 'in', 'out', 'on', 'off', 'of', 'is', 'are', 'was', 'were'
+  ]);
+
+  async function gbCopy(text) {
+    try { await navigator.clipboard.writeText(text); return true; } catch (e) {}
+    const t = document.createElement('textarea'); t.value = text; t.style.position = 'fixed'; t.style.opacity = '0';
+    document.body.appendChild(t); t.select(); const ok = document.execCommand('copy'); t.remove(); return ok;
+  }
+
+  function updateCharCount() {
+    const val = document.getElementById('inputArea').value;
+    document.getElementById('inputCharCount').textContent = `${val.length} ký tự`;
+  }
+
+  function setStatus(badgeText, rightText, isDone) {
+    const badge = document.getElementById('statusBadge');
+    const right = document.getElementById('outputStatus');
+    badge.textContent = badgeText;
+    right.textContent = rightText;
+
+    if (isDone) {
+      badge.className = 'px-3 py-1 rounded-lg border border-amber-300 bg-primary-soft text-[11px] font-bold text-primary-ink';
+      right.className = 'text-xs font-mono text-primary-ink font-bold';
+    } else {
+      badge.className = 'px-3 py-1 rounded-lg border border-neutral bg-white text-[11px] font-bold text-slate-500';
+      right.className = 'text-xs font-mono text-slate-400';
+    }
+  }
+
+  function removeVietnameseTones(str) {
+    return str
+      .replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, 'a')
+      .replace(/À|Á|Ạ|Ả|Ã|Â|Ầ|Ấ|Ậ|Ẩ|Ẫ|Ă|Ằ|Ắ|Ặ|Ẳ|Ẵ/g, 'A')
+      .replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g, 'e')
+      .replace(/È|É|Ẹ|Ẻ|Ẽ|Ê|Ề|Ế|Ệ|Ể|Ễ/g, 'E')
+      .replace(/ì|í|ị|ỉ|ĩ/g, 'i')
+      .replace(/Ì|Í|Ị|Ỉ|Ĩ/g, 'I')
+      .replace(/ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ/g, 'o')
+      .replace(/Ò|Ó|Ọ|Ỏ|Õ|Ô|Ồ|Ố|Ộ|Ổ|Ỗ|Ơ|Ờ|Ớ|Ợ|Ở|Ỡ/g, 'O')
+      .replace(/ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ/g, 'u')
+      .replace(/Ù|Ú|Ụ|Ủ|Ũ|Ư|Ừ|Ứ|Ự|Ử|Ữ/g, 'U')
+      .replace(/ỳ|ý|ỵ|ỷ|ỹ/g, 'y')
+      .replace(/Ỳ|Ý|Ỵ|Ỷ|Ỹ/g, 'Y')
+      .replace(/đ/g, 'd')
+      .replace(/Đ/g, 'D')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '');
+  }
+
+  function convertSingleTextToSlug(text, separator, caseMode, maxLen, removeStop) {
+    if (!text.trim()) return '';
+
+    // 1. Chuyển ký tự tiếng Việt có dấu sang không dấu
+    let cleaned = removeVietnameseTones(text);
+
+    // 2. Xử lý chữ hoa/thường theo tùy chọn
+    if (caseMode === 'lower') {
+      cleaned = cleaned.toLowerCase();
+    }
+
+    // 3. Loại bỏ ký tự đặc biệt, giữ lại chữ cái, số và khoảng trắng
+    cleaned = cleaned.replace(/[^a-zA-Z0-9\s-_]/g, ' ');
+
+    // 4. Tách thành mảng các từ
+    let words = cleaned.split(/[\s-_]+/).filter(Boolean);
+
+    // 5. Lọc từ dừng nếu người dùng tích chọn
+    if (removeStop && words.length > 1) {
+      const filtered = words.filter(w => !STOP_WORDS.has(w.toLowerCase()));
+      if (filtered.length > 0) words = filtered;
+    }
+
+    // 6. Nối các từ bằng dấu phân cách
+    let slug = words.join(separator);
+
+    // 7. Giới hạn độ dài tối đa nếu > 0
+    if (maxLen > 0 && slug.length > maxLen) {
+      slug = slug.substring(0, maxLen);
+      // Tránh cắt lửng làm dư dấu phân cách ở cuối
+      if (slug.endsWith(separator)) {
+        slug = slug.slice(0, -1);
+      }
+    }
+
+    return slug;
+  }
+
+  function generateSlugs() {
+    const rawInput = document.getElementById('inputArea').value;
+    if (!rawInput.trim()) {
+      document.getElementById('outputArea').value = '';
+      setStatus('Đang chờ', 'Chưa có dữ liệu', false);
+      return;
+    }
+
+    const separator = document.getElementById('separatorSelect').value;
+    const caseMode = document.getElementById('caseSelect').value;
+    const maxLen = parseInt(document.getElementById('maxLengthInput').value, 10) || 0;
+    const removeStop = document.getElementById('chkStopWords').checked;
+    const perLine = document.getElementById('chkPerLine').checked;
+
+    let result = '';
+    if (perLine) {
+      const lines = rawInput.split(/\r?\n/);
+      result = lines
+        .map(line => convertSingleTextToSlug(line, separator, caseMode, maxLen, removeStop))
+        .join('\n');
+    } else {
+      result = convertSingleTextToSlug(rawInput, separator, caseMode, maxLen, removeStop);
+    }
+
+    document.getElementById('outputArea').value = result;
+    setStatus('Hoàn tất', `${result.length} ký tự`, true);
+  }
+
+  function autoGenerateIfReady() {
+    if (document.getElementById('inputArea').value.trim() !== '') {
+      generateSlugs();
+    }
+  }
+
+  async function copySlugOutput() {
+    const outVal = document.getElementById('outputArea').value;
+    if (!outVal) return;
+    const ok = await gbCopy(outVal);
+    if (ok) alert('Đã sao chép đường dẫn Slug vào bộ nhớ tạm!');
+  }
+
+  function clearAll() {
+    document.getElementById('inputArea').value = '';
+    document.getElementById('outputArea').value = '';
+    updateCharCount();
+    setStatus('Đang chờ', 'Đã xóa', false);
+  }
+</script>
+</body>
+</html>
